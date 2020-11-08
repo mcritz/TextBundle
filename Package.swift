@@ -5,6 +5,11 @@ import PackageDescription
 
 let package = Package(
     name: "TextBundle",
+    platforms: [
+        .macOS(.v10_14),
+        .iOS(.v13),
+        .tvOS(.v13),
+    ],
     products: [
         // Products define the executables and libraries a package produces, and make them visible to other packages.
         .library(
@@ -20,9 +25,17 @@ let package = Package(
         // Targets can depend on other targets in this package, and on products in packages this package depends on.
         .target(
             name: "TextBundle",
-            dependencies: []),
+            dependencies: [],
+            resources: [
+                .process("Resources/white_rabbit.jpg")
+            ]
+        ),
         .testTarget(
             name: "TextBundleTests",
-            dependencies: ["TextBundle"]),
+            dependencies: ["TextBundle"],
+            resources: [
+                .process("Resrouces/white_rabbit.jpg")
+            ]
+        ),
     ]
 )
