@@ -1,3 +1,5 @@
 # TextBundle
 
-A description of this package.
+Ground-up Swift rewrite of [TextBundle](http://textbundle.org)
+
+Supports bundling Markdown files.
