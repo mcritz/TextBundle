@@ -1,6 +1,6 @@
 # TextBundle
 
-Ground-up Swift rewrite of [TextBundle](http://textbundle.org)
+Ground-up Swift rewrite of [TextBundle](http://textbundle.org). If you’re looking for an Objective-C implemenetation, try [shinyfrog/TextBundle](https://github.com/shinyfrog/TextBundle)
 
 Supports bundling Markdown files.
 

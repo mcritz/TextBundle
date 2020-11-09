@@ -1,4 +1,5 @@
 import Foundation
+import Zip
 
 public struct TextBundle: Codable {
     var name: String
@@ -29,18 +30,37 @@ extension TextBundle {
     }
 }
 
-extension TextBundle {
-    enum Fail: Error {
-        case invalidDirectory
-    }
+// MARK: -
+
+enum TextBundleError: Error {
+    case invalidDirectory
+    case invalidFormat
 }
 
+// MARK: - Pack
 extension TextBundle {
-    public func pack(destinationURL: URL, completion: (Bool) -> ()) throws {
+    
+    private func compress(_ url: URL, progress: ((Double) -> ())? ) throws -> URL {
+        let destination = url.deletingLastPathComponent()
+            .appendingPathComponent("\(self.name).textpack")
+        do {
+            try Zip.zipFiles(paths: [url], zipFilePath: destination, password: nil, progress: { (inProgress) -> () in
+                if let progress = progress { progress(inProgress) }
+            })
+        } catch {
+            throw error
+        }
+        return destination
+    }
+    
+    public func bundle(destinationURL: URL,
+                       compressed: Bool = false,
+                       progress: ((Double) -> ())? = nil,
+                       completion: (URL) -> ()) throws {
         
         var isDirectory = ObjCBool(true)
         guard FileManager.default.fileExists(atPath: destinationURL.path, isDirectory: &isDirectory) else {
-            throw TextBundle.Fail.invalidDirectory
+            throw TextBundleError.invalidDirectory
         }
         
         let bundleDirectoryURL = destinationURL.appendingPathComponent(name.appending(".textbundle"), isDirectory: true)
@@ -73,6 +93,11 @@ extension TextBundle {
                                              to: assetsDirectory.appendingPathComponent(fileName, isDirectory: false))
             }
         }
-        completion(true)
+        
+        if compressed {
+            completion(try compress(bundleDirectoryURL, progress: progress))
+            return
+        }
+        completion(bundleDirectoryURL)
     }
 }

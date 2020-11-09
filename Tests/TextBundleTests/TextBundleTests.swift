@@ -9,10 +9,10 @@ final class TextBundleTests: XCTestCase {
         XCTAssertNotNil(bundle)
     }
     
-    func testPack() throws {
+    func testBundle() throws {
         let badURLBundle = TextBundle(name: "Fail", contents: "# Hola, Mundo!", assetURLs: nil)
         let invalidURL = URL(string: "~/invalid/url/path")!
-        XCTAssertThrowsError(try badURLBundle.pack(destinationURL: invalidURL) { _ in })
+        XCTAssertThrowsError(try badURLBundle.bundle(destinationURL: invalidURL) { _ in })
         
         let cacheURL = try FileManager.default.url(for: .cachesDirectory, in: .userDomainMask, appropriateFor: nil, create: false)
         let almostUnique = UUID().uuidString
@@ -22,9 +22,8 @@ final class TextBundleTests: XCTestCase {
         }
         let textBundleName = "TestPack-\(almostUnique)"
         let bundle = TextBundle(name: textBundleName, contents: markdownString, assetURLs: [assetURL])
-        XCTAssertNoThrow(try bundle.pack(destinationURL: cacheURL, completion: { didFinish in
-            XCTAssertTrue(didFinish)
-            print(cacheURL)
+        XCTAssertNoThrow(try bundle.bundle(destinationURL: cacheURL, completion: { bundleURL in
+            XCTAssertNotNil(bundleURL)
             do {
                 let bundleBaseURL = cacheURL.appendingPathComponent(bundle.name.appending(".textbundle"))
                 guard let infoJSONData: Data = FileManager.default.contents(atPath: bundleBaseURL.appendingPathComponent("info.json").path) else {
@@ -47,14 +46,33 @@ final class TextBundleTests: XCTestCase {
         }))
     }
     
+    
+    func testPack() throws {
+        
+        guard let rabbitImageURL: URL = Bundle.module.url(forResource: "white_rabbit", withExtension: "jpg") else {
+            XCTFail("coultn’t load image")
+            return
+        }
+
+        let almostUnique = "TestBundle-\(UUID().uuidString)"
+        let bundle = TextBundle(name: almostUnique, contents: markdownString, assetURLs: [rabbitImageURL])
+        let destinationURL = try FileManager.default.url(for: .cachesDirectory, in: .userDomainMask, appropriateFor: nil, create: true)
+        try bundle.bundle(destinationURL: destinationURL, compressed: true, progress: { (someDouble) in
+            print(someDouble)
+        }) { bundleURL in
+            XCTAssertNotNil(bundleURL)
+        }
+    }
+    
     static var allTests = [
         ("testTextBundle", testTextBundle),
-        ("testPack", testPack),
+        ("testBundle", testBundle),
+        ("textPack", testPack),
     ]
     
     let markdownString = """
         # Konnichiwa Sakyou!
         
-        ![rabbit]([assets/guillermo-casales-LQfcolSv2M0-unsplash.jpg)
+        ![rabbit]([assets/white_rabbit.jpg)
     """
 }
