@@ -2,6 +2,34 @@ import XCTest
 @testable import TextBundle
 
 final class TextBundleTests: XCTestCase {
+    
+    override func tearDown() {
+        do {
+            let caches = try FileManager.default
+                .url(for: .cachesDirectory,
+                     in: .userDomainMask,
+                     appropriateFor: nil,
+                     create: false)
+            let matching = try FileManager.default
+                .contentsOfDirectory(at: caches,
+                                     includingPropertiesForKeys: nil,
+                                     options: [.skipsPackageDescendants, .skipsHiddenFiles, .skipsSubdirectoryDescendants])
+            let pathsToDelete = matching.filter { url in
+                return (url.pathExtension == "textbundle")
+                    || (url.pathExtension == "textpack")
+            }
+            pathsToDelete.forEach { deadToMeURL in
+                do {
+                    try FileManager.default.removeItem(at: deadToMeURL)
+                } catch {
+                    print("Could not remove test file \(deadToMeURL.path)")
+                }
+            }
+        } catch {
+            print("Could not clean up test files.\n\nError:", error.localizedDescription)
+        }
+    }
+    
     func testTextBundle() {
         let bundle = TextBundle(name: "TestValid",
                                 contents: "# Hello, World!",
@@ -71,8 +99,8 @@ final class TextBundleTests: XCTestCase {
     ]
     
     let markdownString = """
-        # Konnichiwa Sakyou!
-        
-        ![rabbit]([assets/white_rabbit.jpg)
+    # Konnichiwa Sakyou!
+    
+    ![rabbit](assets/white_rabbit.jpg)
     """
 }
