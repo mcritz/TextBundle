@@ -35,6 +35,46 @@ extension TextBundle {
 enum TextBundleError: Error {
     case invalidDirectory
     case invalidFormat
+    case conversionError
+}
+
+extension TextBundle {
+    
+    static func readTextBundle(_ baseURL: URL) throws -> TextBundle {
+        let jsonDecoder = JSONDecoder()
+        let assetsURL = baseURL.appendingPathComponent("assets")
+        let assetsURLs = try FileManager.default
+                .contentsOfDirectory(at: assetsURL,
+                                        includingPropertiesForKeys: nil,
+                                        options: [
+                                            .skipsSubdirectoryDescendants, .skipsHiddenFiles
+                                        ])
+        let relativeAssetsURLs = assetsURLs.map { url -> URL in
+            URL(fileURLWithPath: url.lastPathComponent, relativeTo: baseURL)
+        }
+        let infoJsonURL = baseURL.appendingPathComponent("info.json")
+        let markdownContents = baseURL.appendingPathComponent("text.markdown")
+        guard let infoData = FileManager.default.contents(atPath: infoJsonURL.path),
+              let textContentsData = FileManager.default.contents(atPath: markdownContents.path),
+              let textContents = String(data: textContentsData, encoding: .utf8)
+               else {
+            throw TextBundleError.invalidFormat
+        }
+        let metaData = try jsonDecoder.decode(TextBundle.Metadata.self, from: infoData)
+        return TextBundle(name: "Name", contents: textContents, metadata: metaData, assetURLs: relativeAssetsURLs)
+    }
+    
+    static func read(_ url: URL) throws -> TextBundle {
+        let ext = url.pathExtension.lowercased()
+        switch ext {
+        case "textbundle":
+            return try TextBundle.readTextBundle(url)
+        case "textpack":
+            throw TextBundleError.invalidFormat
+        default:
+            throw TextBundleError.invalidFormat
+        }
+    }
 }
 
 // MARK: - Pack

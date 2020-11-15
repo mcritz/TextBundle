@@ -68,6 +68,13 @@ final class TextBundleTests: XCTestCase {
                                     .appendingPathComponent("white_rabbit.jpg")
                                     .path)
                 XCTAssertTrue(assetExists)
+                
+                // MARK: - Read
+                let invalidURL = URL(string: "https://example.com")!
+                XCTAssertThrowsError(try TextBundle.read(invalidURL))
+                
+                let readBundle = try? TextBundle.read(bundleURL)
+                XCTAssertNotNil(readBundle)
             } catch {
                 XCTFail("Could not test bundle contents")
             }
@@ -89,6 +96,9 @@ final class TextBundleTests: XCTestCase {
             print(someDouble)
         }) { bundleURL in
             XCTAssertNotNil(bundleURL)
+            
+            let unpackedBundle = try? TextBundle.read(bundleURL)
+            XCTAssertNotNil(unpackedBundle)
         }
     }
     
