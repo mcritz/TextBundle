@@ -99,7 +99,7 @@ final class TextBundleTests: XCTestCase {
             do {
                 let unpackedBundle = try TextBundle.read(bundleURL)
                 XCTAssertNotNil(unpackedBundle)
-//                XCTAssertEqual(unpackedBundle.name, testBundleName)
+                XCTAssertEqual(unpackedBundle.name, testBundleName)
             } catch {
                 print(error.localizedDescription)
                 XCTFail("Error reading unpacked bundle")
