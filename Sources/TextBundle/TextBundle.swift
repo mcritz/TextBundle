@@ -32,13 +32,25 @@ extension TextBundle {
 
 // MARK: -
 
-enum TextBundleError: Error {
-    case invalidDirectory
-    case invalidFormat
-    case conversionError
-}
-
 extension TextBundle {
+    
+    static func unpack(_ packURL: URL) throws -> URL {
+        let caches = try FileManager.default
+            .url(for: .cachesDirectory,
+                 in: .userDomainMask,
+                 appropriateFor: packURL,
+                 create: false)
+        Zip.addCustomFileExtension("textpack")
+        try Zip.unzipFile(packURL,
+                            destination: caches,
+                            overwrite: true,
+                            password: nil)
+        return caches.appendingPathComponent(packURL.lastPathComponent)
+    }
+    
+    static func readTextPack(_ packURL: URL) throws -> TextBundle {
+        try TextBundle.readTextBundle(try TextBundle.unpack(packURL))
+    }
     
     static func readTextBundle(_ baseURL: URL) throws -> TextBundle {
         let jsonDecoder = JSONDecoder()
@@ -49,19 +61,16 @@ extension TextBundle {
                                         options: [
                                             .skipsSubdirectoryDescendants, .skipsHiddenFiles
                                         ])
-        let relativeAssetsURLs = assetsURLs.map { url -> URL in
-            URL(fileURLWithPath: url.lastPathComponent, relativeTo: baseURL)
-        }
         let infoJsonURL = baseURL.appendingPathComponent("info.json")
         let markdownContents = baseURL.appendingPathComponent("text.markdown")
         guard let infoData = FileManager.default.contents(atPath: infoJsonURL.path),
               let textContentsData = FileManager.default.contents(atPath: markdownContents.path),
               let textContents = String(data: textContentsData, encoding: .utf8)
                else {
-            throw TextBundleError.invalidFormat
+            throw Errors.invalidFormat
         }
         let metaData = try jsonDecoder.decode(TextBundle.Metadata.self, from: infoData)
-        return TextBundle(name: "Name", contents: textContents, metadata: metaData, assetURLs: relativeAssetsURLs)
+        return TextBundle(name: "Name", contents: textContents, metadata: metaData, assetURLs: assetsURLs)
     }
     
     static func read(_ url: URL) throws -> TextBundle {
@@ -70,9 +79,9 @@ extension TextBundle {
         case "textbundle":
             return try TextBundle.readTextBundle(url)
         case "textpack":
-            throw TextBundleError.invalidFormat
+            return try TextBundle.readTextPack(url)
         default:
-            throw TextBundleError.invalidFormat
+            throw Errors.invalidFormat
         }
     }
 }
@@ -100,7 +109,7 @@ extension TextBundle {
         
         var isDirectory = ObjCBool(true)
         guard FileManager.default.fileExists(atPath: destinationURL.path, isDirectory: &isDirectory) else {
-            throw TextBundleError.invalidDirectory
+            throw Errors.invalidDirectory
         }
         
         let bundleDirectoryURL = destinationURL.appendingPathComponent(name.appending(".textbundle"), isDirectory: true)

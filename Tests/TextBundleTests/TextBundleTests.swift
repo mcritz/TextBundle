@@ -73,10 +73,10 @@ final class TextBundleTests: XCTestCase {
                 let invalidURL = URL(string: "https://example.com")!
                 XCTAssertThrowsError(try TextBundle.read(invalidURL))
                 
-                let readBundle = try? TextBundle.read(bundleURL)
+                let readBundle = try TextBundle.read(bundleURL)
                 XCTAssertNotNil(readBundle)
             } catch {
-                XCTFail("Could not test bundle contents")
+                XCTFail("Could not test bundle contents. \n\nError: \(error.localizedDescription)")
             }
         }))
     }
@@ -89,16 +89,21 @@ final class TextBundleTests: XCTestCase {
             return
         }
 
-        let almostUnique = "TestBundle-\(UUID().uuidString)"
-        let bundle = TextBundle(name: almostUnique, contents: markdownString, assetURLs: [rabbitImageURL])
+        let testBundleName = "TestBundle-\(UUID().uuidString)"
+        let bundle = TextBundle(name: testBundleName, contents: markdownString, assetURLs: [rabbitImageURL])
         let destinationURL = try FileManager.default.url(for: .cachesDirectory, in: .userDomainMask, appropriateFor: nil, create: true)
         try bundle.bundle(destinationURL: destinationURL, compressed: true, progress: { (someDouble) in
             print(someDouble)
         }) { bundleURL in
             XCTAssertNotNil(bundleURL)
-            
-            let unpackedBundle = try? TextBundle.read(bundleURL)
-            XCTAssertNotNil(unpackedBundle)
+            do {
+                let unpackedBundle = try TextBundle.read(bundleURL)
+                XCTAssertNotNil(unpackedBundle)
+//                XCTAssertEqual(unpackedBundle.name, testBundleName)
+            } catch {
+                print(error.localizedDescription)
+                XCTFail("Error reading unpacked bundle")
+            }
         }
     }
     
