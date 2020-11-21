@@ -100,6 +100,11 @@ final class TextBundleTests: XCTestCase {
                 let unpackedBundle = try TextBundle.read(bundleURL)
                 XCTAssertNotNil(unpackedBundle)
                 XCTAssertEqual(unpackedBundle.name, testBundleName)
+                XCTAssertEqual(unpackedBundle.textContents, markdownString)
+                XCTAssertEqual(unpackedBundle.meta, bundle.meta)
+                let originalFileNames = [rabbitImageURL].map { $0.lastPathComponent }
+                let resultFileNames = unpackedBundle.assetURLs?.map { $0.lastPathComponent }
+                XCTAssertEqual(resultFileNames, originalFileNames)
             } catch {
                 print(error.localizedDescription)
                 XCTFail("Error reading unpacked bundle")

@@ -3,7 +3,11 @@ extension TextBundle {
         case infoFileName = "info.json"
         case markdownContentsFileName = "text.markdown"
         case assetsFolderName = "assets"
-        case bundleExtension = ".textbundle"
-        case packExtension = ".textpack"
+        case bundle = "textbundle"
+        case pack = "textpack"
+        
+        var ext: String {
+            "." + self.rawValue
+        }
     }
 }
