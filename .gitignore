@@ -4,5 +4,5 @@
 /*.xcodeproj
 xcuserdata/
 Package.resolved
+.swiftpm/xcode/package.xcworkspace
 .swiftpm*
-.swiftpm/*
