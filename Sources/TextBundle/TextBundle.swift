@@ -7,7 +7,7 @@ public struct TextBundle: Codable {
     var assetURLs: [URL]?
     var meta: Metadata
     
-    init(name: String, contents: String, metadata: Metadata = Metadata(), assetURLs: [URL]?) {
+    public init(name: String, contents: String, metadata: Metadata = Metadata(), assetURLs: [URL]?) {
         self.name = name
         self.textContents = contents
         self.meta = metadata
@@ -22,7 +22,7 @@ extension TextBundle: Equatable { }
 extension TextBundle {
     public struct Metadata: Codable, Equatable {
         
-        typealias UTI = UniversalTypeIdentifier
+        public typealias UTI = UniversalTypeIdentifier
         public enum UniversalTypeIdentifier: String, Codable {
             case html = "public.html"
             case markdown = "net.daringfireball.markdown"
@@ -35,11 +35,20 @@ extension TextBundle {
         var creatorURL: URL?
         var creatorIdentifier: String?
         var sourceURL: URL?
+        
+        public init(_ version: Int = 2, type: String = UTI.markdown.rawValue, transient: Bool? = false, creatorURL: URL? = nil, creatorIdentifier: String? = nil, sourceURL: URL? = nil) {
+            self.version = version
+            self.type = type
+            self.transient = transient
+            self.creatorURL = creatorURL
+            self.creatorIdentifier = creatorIdentifier
+            self.sourceURL = sourceURL
+        }
     }
 }
 
 // MARK: - Pack
-extension TextBundle {
+public extension TextBundle {
     
     /// Compresses a file as a `.textpack`
     /// - Parameters:
@@ -69,7 +78,7 @@ extension TextBundle {
     ///   - compressed: `true` will save as Zip-compressed `.textpack` file. Default `false` will save as uncompressed `.textpack` bundle.
     ///   - progress: handler for compression progress
     ///   - completion: handler with the destination `URL`
-    public func bundle(destinationURL: URL,
+    func bundle(destinationURL: URL,
                        compressed: Bool = false,
                        progress: ((Double) -> ())? = nil,
                        completion: (URL) -> ()) throws {
@@ -126,7 +135,7 @@ extension TextBundle {
 
 // MARK: - Unpack
 
-extension TextBundle {
+public extension TextBundle {
     
     /// Reads a `.textbundle` or `.textpack`.
     /// - Parameter url: FileSystem `URL` of the Bundle
