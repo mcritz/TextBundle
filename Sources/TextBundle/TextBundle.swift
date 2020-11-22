@@ -21,12 +21,16 @@ extension TextBundle: Equatable { }
 
 extension TextBundle {
     public struct Metadata: Codable, Equatable {
-        public enum BundleType: String, Codable {
+        
+        typealias UTI = UniversalTypeIdentifier
+        public enum UniversalTypeIdentifier: String, Codable {
+            case html = "public.html"
             case markdown = "net.daringfireball.markdown"
+            case package = "org.textbundle.package"
         }
         
-        var version: Int = 3
-        var type: BundleType = .markdown
+        var version: Int = 2
+        var type: String = UTI.markdown.rawValue
         var transient: Bool? = false
         var creatorURL: URL?
         var creatorIdentifier: String?
@@ -37,6 +41,11 @@ extension TextBundle {
 // MARK: - Pack
 extension TextBundle {
     
+    /// Compresses a file as a `.textpack`
+    /// - Parameters:
+    ///   - url: filesystem `URL` of the source file
+    ///   - progress: handler for Zip progress
+    /// - Returns: `URL` of the compressed file
     private func compress(_ url: URL, progress: ((Double) -> ())? ) throws -> URL {
         let fileName = self.name + Constants.pack.ext
         let destination = url.deletingLastPathComponent()
@@ -54,13 +63,20 @@ extension TextBundle {
         return destination
     }
     
+    /// Writes a `TextBundle` to disk as either uncompressed `.textbundle` or compressed `.textpack`
+    /// - Parameters:
+    ///   - destinationURL: directory where the bundle will be saved
+    ///   - compressed: `true` will save as Zip-compressed `.textpack` file. Default `false` will save as uncompressed `.textpack` bundle.
+    ///   - progress: handler for compression progress
+    ///   - completion: handler with the destination `URL`
     public func bundle(destinationURL: URL,
                        compressed: Bool = false,
                        progress: ((Double) -> ())? = nil,
                        completion: (URL) -> ()) throws {
         
         var isDirectory = ObjCBool(true)
-        guard FileManager.default.fileExists(atPath: destinationURL.path, isDirectory: &isDirectory) else {
+        guard FileManager.default.fileExists(atPath: destinationURL.path,
+                                             isDirectory: &isDirectory) else {
             throw Errors.invalidDirectory
         }
         
@@ -112,6 +128,9 @@ extension TextBundle {
 
 extension TextBundle {
     
+    /// Uncompresses a file as a `.textbundle` Bundle in the `Caches` directory
+    /// - Parameter packURL: FileSystem `URL` of the source file. Ex: `helloworld.textpack`
+    /// - Returns: `URL` of the uncompressed contents as a `.textbundle`
     static func unpack(_ packURL: URL) throws -> URL {
         let caches = try FileManager.default
             .url(for: .cachesDirectory,
@@ -129,10 +148,16 @@ extension TextBundle {
         return caches.appendingPathComponent(bundleFilename)
     }
     
+    /// Reads a `.textpack` bundle
+    /// - Parameter packURL:  FileSystem `URL` of the bundle
     static func readTextPack(_ packURL: URL) throws -> TextBundle {
         try TextBundle.readTextBundle(try TextBundle.unpack(packURL))
     }
     
+    /// Reads a `.textbundle` Bundle.
+    /// Consider calling `TextBundle.read(_:)` which can handle `.textbundle` or `.textpack`.
+    /// - Parameter baseURL: `URL` of the Textbundle
+    /// - Returns: `TextBundle` of the contents
     static func readTextBundle(_ baseURL: URL) throws -> TextBundle {
         let bundleName = baseURL.deletingPathExtension().lastPathComponent
         let jsonDecoder = JSONDecoder()
@@ -158,6 +183,10 @@ extension TextBundle {
                           assetURLs: assetsURLs)
     }
     
+    /// Reads a `.textbundle` or `.textpack`.
+    /// - Parameter url: FileSystem `URL` of the Bundle
+    /// - Throws: “Invalid Format” if nothing can be read
+    /// - Returns: `TextBundle`
     static func read(_ url: URL) throws -> TextBundle {
         let ext = url.pathExtension.lowercased()
         switch ext {

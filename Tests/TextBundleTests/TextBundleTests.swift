@@ -59,7 +59,7 @@ final class TextBundleTests: XCTestCase {
                     return
                 }
                 let bundleMetadata = try JSONDecoder().decode(TextBundle.Metadata.self, from: infoJSONData)
-                XCTAssertEqual(bundleMetadata.version, 3)
+                XCTAssertEqual(bundleMetadata.version, 2)
                 XCTAssertEqual(bundleMetadata.transient, false)
                 
                 

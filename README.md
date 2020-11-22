@@ -1,9 +1,10 @@
 # TextBundle
 
-Ground-up Swift rewrite of [TextBundle](http://textbundle.org). If you’re looking for an Objective-C implemenetation, try [shinyfrog/TextBundle](https://github.com/shinyfrog/TextBundle)
+Swift-first package for [TextBundle](http://textbundle.org). Supports [version 2 of the spec](http://textbundle.org/spec/).
 
-Supports bundling Markdown files.
+If you’re looking for an alternative implemenetation, try [shinyfrog/TextBundle](https://github.com/shinyfrog/TextBundle).
 
+---
 
 Thanks to Guillermo Casales @gcasales for making this photo available freely on Unsplash 🎁
 https://unsplash.com/photos/LQfcolSv2M0
