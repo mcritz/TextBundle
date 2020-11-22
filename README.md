@@ -12,7 +12,7 @@ In `Package.swift`
 
 ```
 dependencies: [
-    .package(url: "https://github.com/mcritz/TextBundle.gi", .upToNextMajor(from: "1.0.0")),
+    .package(url: "https://github.com/mcritz/TextBundle.git", .upToNextMajor(from: "1.0.0")),
 ],
 ```
 
