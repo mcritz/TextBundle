@@ -128,6 +128,22 @@ extension TextBundle {
 
 extension TextBundle {
     
+    /// Reads a `.textbundle` or `.textpack`.
+    /// - Parameter url: FileSystem `URL` of the Bundle
+    /// - Throws: “Invalid Format” if nothing can be read
+    /// - Returns: `TextBundle`
+    static func read(_ url: URL) throws -> TextBundle {
+        let ext = url.pathExtension.lowercased()
+        switch ext {
+        case Constants.bundle.rawValue:
+            return try TextBundle.readTextBundle(url)
+        case Constants.pack.rawValue:
+            return try TextBundle.readTextPack(url)
+        default:
+            throw Errors.invalidFormat
+        }
+    }
+    
     /// Uncompresses a file as a `.textbundle` Bundle in the `Caches` directory
     /// - Parameter packURL: FileSystem `URL` of the source file. Ex: `helloworld.textpack`
     /// - Returns: `URL` of the uncompressed contents as a `.textbundle`
@@ -181,21 +197,5 @@ extension TextBundle {
                           contents: textContents,
                           metadata: metaData,
                           assetURLs: assetsURLs)
-    }
-    
-    /// Reads a `.textbundle` or `.textpack`.
-    /// - Parameter url: FileSystem `URL` of the Bundle
-    /// - Throws: “Invalid Format” if nothing can be read
-    /// - Returns: `TextBundle`
-    static func read(_ url: URL) throws -> TextBundle {
-        let ext = url.pathExtension.lowercased()
-        switch ext {
-        case Constants.bundle.rawValue:
-            return try TextBundle.readTextBundle(url)
-        case Constants.pack.rawValue:
-            return try TextBundle.readTextPack(url)
-        default:
-            throw Errors.invalidFormat
-        }
     }
 }

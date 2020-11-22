@@ -50,7 +50,7 @@ final class TextBundleTests: XCTestCase {
         }
         let textBundleName = "TestPack-\(almostUnique)"
         let bundle = TextBundle(name: textBundleName, contents: markdownString, assetURLs: [assetURL])
-        XCTAssertNoThrow(try bundle.bundle(destinationURL: cacheURL, completion: { bundleURL in
+        XCTAssertNoThrow(try bundle.bundle(destinationURL: cacheURL) { bundleURL in
             XCTAssertNotNil(bundleURL)
             do {
                 let bundleBaseURL = cacheURL.appendingPathComponent(bundle.name.appending(".textbundle"))
@@ -78,7 +78,7 @@ final class TextBundleTests: XCTestCase {
             } catch {
                 XCTFail("Could not test bundle contents. \n\nError: \(error.localizedDescription)")
             }
-        }))
+        })
     }
     
     
