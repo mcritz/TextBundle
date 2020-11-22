@@ -126,7 +126,9 @@ public extension TextBundle {
         }
         
         if compressed {
-            completion(try compress(bundleDirectoryURL, progress: progress))
+            let packURL = try compress(bundleDirectoryURL, progress: progress)
+            try FileManager.default.removeItem(at: bundleDirectoryURL)
+            completion(packURL)
             return
         }
         completion(bundleDirectoryURL)

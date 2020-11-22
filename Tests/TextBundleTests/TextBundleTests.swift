@@ -92,10 +92,17 @@ final class TextBundleTests: XCTestCase {
         let testBundleName = "TestBundle-\(UUID().uuidString)"
         let bundle = TextBundle(name: testBundleName, contents: markdownString, assetURLs: [rabbitImageURL])
         let destinationURL = try FileManager.default.url(for: .cachesDirectory, in: .userDomainMask, appropriateFor: nil, create: true)
-        try bundle.bundle(destinationURL: destinationURL, compressed: true, progress: { (someDouble) in
+        try bundle.bundle(destinationURL: destinationURL, compressed: true, progress: { someDouble in
             print(someDouble)
         }) { bundleURL in
             XCTAssertNotNil(bundleURL)
+            
+            // The created TextBundle should not exist
+            let bundleFileName = testBundleName.appending(TextBundle.Constants.bundle.ext)
+            let bundleFileURL = bundleURL.deletingLastPathComponent().appendingPathComponent(bundleFileName)
+            XCTAssertFalse(FileManager.default.fileExists(atPath: bundleFileURL.path), "The intermediate TextBundle should be deleted when creating a .textpack")
+            
+            
             do {
                 let unpackedBundle = try TextBundle.read(bundleURL)
                 XCTAssertNotNil(unpackedBundle)
