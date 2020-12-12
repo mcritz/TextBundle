@@ -2,10 +2,10 @@ import Foundation
 import Zip
 
 public struct TextBundle: Codable {
-    var name: String
-    var textContents: String
-    var assetURLs: [URL]?
-    var meta: Metadata
+    public var name: String
+    public var textContents: String
+    public var assetURLs: [URL]?
+    public var meta: Metadata
     
     public init(name: String, contents: String, metadata: Metadata = Metadata(), assetURLs: [URL]?) {
         self.name = name
@@ -29,12 +29,12 @@ extension TextBundle {
             case package = "org.textbundle.package"
         }
         
-        var version: Int = 2
-        var type: String = UTI.markdown.rawValue
-        var transient: Bool? = false
-        var creatorURL: URL?
-        var creatorIdentifier: String?
-        var sourceURL: URL?
+        public var version: Int = 2
+        public var type: String = UTI.markdown.rawValue
+        public var transient: Bool? = false
+        public var creatorURL: URL?
+        public var creatorIdentifier: String?
+        public var sourceURL: URL?
         
         public init(_ version: Int = 2, type: String = UTI.markdown.rawValue, transient: Bool? = false, creatorURL: URL? = nil, creatorIdentifier: String? = nil, sourceURL: URL? = nil) {
             self.version = version

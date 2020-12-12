@@ -119,6 +119,18 @@ final class TextBundleTests: XCTestCase {
         }
     }
     
+    func testTextBundleRepresentable() {
+        struct Dingus: TextBundleRepresentable {
+            var name: String
+            var textContents: String
+            var assetURLS: [URL]?
+            var meta: TextBundle.Metadata
+        }
+        
+        let dingus = Dingus(name: "dingus", textContents: "# Dingus", assetURLS: nil, meta: TextBundle.Metadata(1, type: "dingus", transient: true, creatorURL: nil, creatorIdentifier: nil, sourceURL: nil))
+        XCTAssertNotNil(dingus)
+    }
+    
     static var allTests = [
         ("testTextBundle", testTextBundle),
         ("testBundle", testBundle),
