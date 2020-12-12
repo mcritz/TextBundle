@@ -135,6 +135,7 @@ final class TextBundleTests: XCTestCase {
         ("testTextBundle", testTextBundle),
         ("testBundle", testBundle),
         ("textPack", testPack),
+        ("testTextBundleRepresentable", testTextBundleRepresentable),
     ]
     
     let markdownString = """
