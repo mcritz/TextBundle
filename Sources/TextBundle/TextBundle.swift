@@ -159,20 +159,18 @@ public extension TextBundle {
     /// - Parameter packURL: FileSystem `URL` of the source file. Ex: `helloworld.textpack`
     /// - Returns: `URL` of the uncompressed contents as a `.textbundle`
     static func unpack(_ packURL: URL) throws -> URL {
-        let caches = try FileManager.default
-            .url(for: .cachesDirectory,
-                 in: .userDomainMask,
-                 appropriateFor: packURL,
-                 create: false)
         Zip.addCustomFileExtension(Constants.pack.rawValue)
-        try Zip.unzipFile(packURL,
-                            destination: caches,
-                            overwrite: true,
-                            password: nil)
-        let bundleFilename = packURL.deletingPathExtension()
-            .lastPathComponent
-            .appending(Constants.bundle.ext)
-        return caches.appendingPathComponent(bundleFilename)
+        let zipDirectory = try Zip.quickUnzipFile(packURL)
+        let contents = try FileManager.default.contentsOfDirectory(at: zipDirectory,
+                                                               includingPropertiesForKeys: nil,
+                                                               options: .skipsPackageDescendants)
+        let maybeBundleURL = contents.first { fileURL -> Bool in
+            fileURL.pathExtension == TextBundle.Constants.bundle.rawValue
+        }
+        guard let bundleURL = maybeBundleURL else {
+            throw Errors.conversionError
+        }
+        return bundleURL
     }
     
     /// Reads a `.textpack` bundle
@@ -189,7 +187,7 @@ public extension TextBundle {
         let bundleName = baseURL.deletingPathExtension().lastPathComponent
         let jsonDecoder = JSONDecoder()
         let assetsURL = baseURL.appendingPathComponent(Constants.assetsFolderName.rawValue)
-        let assetsURLs = try FileManager.default
+        let assetsURLs = try? FileManager.default
                 .contentsOfDirectory(at: assetsURL,
                                      includingPropertiesForKeys: nil,
                                      options: [

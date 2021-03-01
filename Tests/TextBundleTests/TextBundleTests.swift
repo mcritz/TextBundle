@@ -114,7 +114,7 @@ final class TextBundleTests: XCTestCase {
                 XCTAssertEqual(resultFileNames, originalFileNames)
             } catch {
                 print(error.localizedDescription)
-                XCTFail("Error reading unpacked bundle")
+                XCTFail("Error reading unpacked bundle \(error.localizedDescription)")
             }
         }
     }
