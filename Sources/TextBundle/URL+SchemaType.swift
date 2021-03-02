@@ -8,10 +8,6 @@ extension URL {
         case network = 2
         
         init(_ schema: String?) {
-            guard schema == schema else {
-                self = .none
-                return
-            }
             switch schema {
             case "https", "http", "ftp", "sftp":
                 self = .network
