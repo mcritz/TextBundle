@@ -90,39 +90,54 @@ public extension TextBundle {
             throw Errors.invalidDirectory
         }
         
-        let bundleDirectoryURL = destinationURL.appendingPathComponent(name.appending(Constants.bundle.ext),
-                                                                       isDirectory: true)
-        try FileManager.default.createDirectory(at: bundleDirectoryURL,
-                                                withIntermediateDirectories: false,
-                                                attributes: nil)
+        let bundleDirectoryURL = destinationURL
+            .appendingPathComponent(name.appending(Constants.bundle.ext),
+                                    isDirectory: true)
+        try FileManager.default
+            .createDirectory(at: bundleDirectoryURL,
+                             withIntermediateDirectories: false,
+                             attributes: nil)
         
         // info.json
         let infoData = try JSONEncoder().encode(meta)
-        FileManager.default.createFile(atPath:
-                                        bundleDirectoryURL.appendingPathComponent(Constants.infoFileName.rawValue,
-                                                                                  isDirectory: false).path,
-                                           contents: infoData,
-                                           attributes: nil)
-        
+        FileManager.default
+            .createFile(atPath: bundleDirectoryURL
+                            .appendingPathComponent(Constants.infoFileName
+                                                        .rawValue,
+                                                    isDirectory: false).path,
+                        contents: infoData,
+                        attributes: nil)
         
         // text.markdown
-        FileManager.default.createFile(atPath: bundleDirectoryURL.appendingPathComponent(Constants.markdownContentsFileName.rawValue,
-                                                                                         isDirectory: false).path,
-                                       contents: textContents.data(using: .utf8),
-                                       attributes: nil)
+        FileManager.default
+            .createFile(atPath: bundleDirectoryURL
+                            .appendingPathComponent(Constants
+                                                        .markdownContentsFileName
+                                                        .rawValue,
+                                                    isDirectory: false)
+                            .path,
+                        contents: textContents.data(using: .utf8),
+                        attributes: nil)
         
         // assets/
-        let assetsDirectory = bundleDirectoryURL.appendingPathComponent(Constants.assetsFolderName.rawValue,
-                                                                        isDirectory: true)
-        try FileManager.default.createDirectory(at: assetsDirectory,
-                                                withIntermediateDirectories: false,
-                                                attributes: nil)
+        let assetsDirectory = bundleDirectoryURL
+            .appendingPathComponent(Constants
+                                        .assetsFolderName
+                                        .rawValue,
+                                    isDirectory: true)
+        try FileManager.default
+            .createDirectory(at: assetsDirectory,
+                             withIntermediateDirectories: false,
+                             attributes: nil)
         if let assetURLs = assetURLs {
             try assetURLs.forEach { url in
                 let fileName = url.lastPathComponent
-                try FileManager.default.copyItem(at: url,
-                                             to: assetsDirectory.appendingPathComponent(fileName,
-                                                                                        isDirectory: false))
+                try FileManager.default
+                    .copyItem(at: url,
+                              to: assetsDirectory
+                                .appendingPathComponent(fileName,
+                                                        isDirectory: false)
+                    )
             }
         }
         
