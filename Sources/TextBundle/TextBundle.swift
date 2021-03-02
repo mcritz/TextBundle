@@ -26,6 +26,7 @@ extension TextBundle {
         public enum UniversalTypeIdentifier: String, Codable {
             case html = "public.html"
             case markdown = "net.daringfireball.markdown"
+            case md = "net.daringfireball.md"
             case package = "org.textbundle.package"
         }
         
@@ -194,9 +195,13 @@ public extension TextBundle {
                                         .skipsSubdirectoryDescendants, .skipsHiddenFiles
                                      ])
         let infoJsonURL = baseURL.appendingPathComponent(Constants.infoFileName.rawValue)
-        let markdownContents = baseURL.appendingPathComponent(Constants.markdownContentsFileName.rawValue)
+        let directoryContents = try FileManager.default.contentsOfDirectory(at: baseURL, includingPropertiesForKeys: nil, options: .skipsSubdirectoryDescendants)
+        
         guard let infoData = FileManager.default.contents(atPath: infoJsonURL.path),
-              let textContentsData = FileManager.default.contents(atPath: markdownContents.path),
+              let markdownContentsURL = directoryContents.first(where: {
+                $0.lastPathComponent.hasPrefix("text")
+              }),
+              let textContentsData = FileManager.default.contents(atPath: markdownContentsURL.path),
               let textContents = String(data: textContentsData, encoding: .utf8)
                else {
             throw Errors.invalidFormat
