@@ -130,14 +130,16 @@ public extension TextBundle {
                              withIntermediateDirectories: false,
                              attributes: nil)
         if let assetURLs = assetURLs {
-            try assetURLs.forEach { url in
-                let fileName = url.lastPathComponent
-                try FileManager.default
-                    .copyItem(at: url,
-                              to: assetsDirectory
-                                .appendingPathComponent(fileName,
-                                                        isDirectory: false)
-                    )
+            assetURLs.forEach { url in
+                let schemaType = URL.SchemaType(url)
+                switch schemaType {
+                case .filesystem:
+                    copyItem(url, to: assetsDirectory)
+                case .network:
+                    downloadItem(url, to: assetsDirectory)
+                default:
+                    break
+                }
             }
         }
         
@@ -148,6 +150,26 @@ public extension TextBundle {
             return
         }
         completion(bundleDirectoryURL)
+    }
+    
+    private func downloadItem(_ url: URL, to directory: URL) {
+        let data = try? Data(contentsOf: url)
+        let fileName = url.lastPathComponent
+        FileManager.default
+            .createFile(atPath: directory
+                            .appendingPathComponent(fileName)
+                            .path,
+                        contents: data,
+                        attributes: nil)
+    }
+    
+    private func copyItem(_ url: URL, to directory: URL) {
+        let fileName = url.lastPathComponent
+        let destinationURL = directory.appendingPathComponent(fileName, isDirectory: false)
+        try? FileManager.default
+            .copyItem(at: url,
+                      to: destinationURL
+            )
     }
 }
 

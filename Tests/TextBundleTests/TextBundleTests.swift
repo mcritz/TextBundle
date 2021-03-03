@@ -44,12 +44,17 @@ final class TextBundleTests: XCTestCase {
         
         let cacheURL = try FileManager.default.url(for: .cachesDirectory, in: .userDomainMask, appropriateFor: nil, create: false)
         let almostUnique = UUID().uuidString
-        guard let assetURL = Bundle.module.url(forResource: "white_rabbit", withExtension: "jpg") else {
+        guard let localAssetURL = Bundle.module.url(forResource: "white_rabbit", withExtension: "jpg") else {
             XCTFail("couldn’t load resource")
             return
         }
+        let remoteAssetURL = URL(string: "https://www.google.com/favicon.ico")!
         let textBundleName = "TestPack-\(almostUnique)"
-        let bundle = TextBundle(name: textBundleName, contents: markdownString, assetURLs: [assetURL])
+        let bundle = TextBundle(name: textBundleName,
+                                contents: markdownString,
+                                assetURLs: [
+                                    localAssetURL,
+                                    remoteAssetURL])
         XCTAssertNoThrow(try bundle.bundle(destinationURL: cacheURL) { bundleURL in
             XCTAssertNotNil(bundleURL)
             do {
@@ -62,12 +67,19 @@ final class TextBundleTests: XCTestCase {
                 XCTAssertEqual(bundleMetadata.version, 2)
                 XCTAssertEqual(bundleMetadata.transient, false)
                 
-                
-                let assetExists: Bool = FileManager.default.fileExists(atPath: bundleBaseURL
+                let localAssetExists: Bool = FileManager.default.fileExists(atPath: bundleBaseURL
                                     .appendingPathComponent("assets")
                                     .appendingPathComponent("white_rabbit.jpg")
                                     .path)
-                XCTAssertTrue(assetExists)
+                XCTAssertTrue(localAssetExists)
+                
+                let remoteAssetExists: Bool = FileManager.default.fileExists(atPath: bundleBaseURL
+                                    .appendingPathComponent("assets")
+                                    .appendingPathComponent("favicon.ico")
+                                    .path)
+                XCTAssertTrue(remoteAssetExists,
+                    "This test will fail if there’s no network connectity to Google. (Check you connection, make sure you can reach Google)"
+                )
                 
                 // MARK: - Read
                 let invalidURL = URL(string: "https://example.com")!
