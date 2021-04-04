@@ -175,6 +175,7 @@ public extension TextBundle {
     }
     
     /// Reads a `.textpack` bundle
+    /// Consider calling `TextBundle.read(_:)` which can handle `.textbundle` or `.textpack`.
     /// - Parameter packURL:  FileSystem `URL` of the bundle
     static func readTextPack(_ packURL: URL) throws -> TextBundle {
         try TextBundle.readTextBundle(try TextBundle.unpack(packURL))
