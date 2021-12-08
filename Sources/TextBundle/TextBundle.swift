@@ -1,11 +1,12 @@
 import Foundation
-import Zip
+import ZIPFoundation
 
 public struct TextBundle: Codable {
     public var name: String
     public var textContents: String
     public var assetURLs: [URL]?
     public var meta: Metadata
+    private var filemanager: FileManager { .default }
     
     public init(name: String, contents: String, metadata: Metadata = Metadata(), assetURLs: [URL]?) {
         self.name = name
@@ -56,17 +57,12 @@ public extension TextBundle {
     ///   - url: filesystem `URL` of the source file
     ///   - progress: handler for Zip progress
     /// - Returns: `URL` of the compressed file
-    private func compress(_ url: URL, progress: ((Double) -> ())? ) throws -> URL {
+    private func compress(_ url: URL) throws -> URL {
         let fileName = self.name + Constants.pack.ext
         let destination = url.deletingLastPathComponent()
             .appendingPathComponent(fileName)
         do {
-            try Zip.zipFiles(paths: [url],
-                             zipFilePath: destination,
-                             password: nil,
-                             progress: { (inProgress) -> () in
-                if let progress = progress { progress(inProgress) }
-            })
+            try filemanager.zipItem(at: url, to: destination)
         } catch {
             throw error
         }
@@ -85,20 +81,20 @@ public extension TextBundle {
                        completion: (URL) -> ()) throws {
         
         var isDirectory = ObjCBool(true)
-        guard FileManager.default.fileExists(atPath: destinationURL.path,
+        guard filemanager.fileExists(atPath: destinationURL.path,
                                              isDirectory: &isDirectory) else {
             throw Errors.invalidDirectory
         }
         
         let bundleDirectoryURL = destinationURL.appendingPathComponent(name.appending(Constants.bundle.ext),
                                                                        isDirectory: true)
-        try FileManager.default.createDirectory(at: bundleDirectoryURL,
+        try filemanager.createDirectory(at: bundleDirectoryURL,
                                                 withIntermediateDirectories: false,
                                                 attributes: nil)
         
         // info.json
         let infoData = try JSONEncoder().encode(meta)
-        FileManager.default.createFile(atPath:
+        filemanager.createFile(atPath:
                                         bundleDirectoryURL.appendingPathComponent(Constants.infoFileName.rawValue,
                                                                                   isDirectory: false).path,
                                            contents: infoData,
@@ -106,7 +102,7 @@ public extension TextBundle {
         
         
         // text.markdown
-        FileManager.default.createFile(atPath: bundleDirectoryURL.appendingPathComponent(Constants.markdownContentsFileName.rawValue,
+        filemanager.createFile(atPath: bundleDirectoryURL.appendingPathComponent(Constants.markdownContentsFileName.rawValue,
                                                                                          isDirectory: false).path,
                                        contents: textContents.data(using: .utf8),
                                        attributes: nil)
@@ -114,7 +110,7 @@ public extension TextBundle {
         // assets/
         let assetsDirectory = bundleDirectoryURL.appendingPathComponent(Constants.assetsFolderName.rawValue,
                                                                         isDirectory: true)
-        try FileManager.default.createDirectory(at: assetsDirectory,
+        try filemanager.createDirectory(at: assetsDirectory,
                                                 withIntermediateDirectories: false,
                                                 attributes: nil)
         if let assetURLs = assetURLs {
@@ -127,8 +123,8 @@ public extension TextBundle {
         }
         
         if compressed {
-            let packURL = try compress(bundleDirectoryURL, progress: progress)
-            try FileManager.default.removeItem(at: bundleDirectoryURL)
+            let packURL = try compress(bundleDirectoryURL)
+            try filemanager.removeItem(at: bundleDirectoryURL)
             completion(packURL)
             return
         }
@@ -160,9 +156,9 @@ public extension TextBundle {
     /// - Parameter packURL: FileSystem `URL` of the source file. Ex: `helloworld.textpack`
     /// - Returns: `URL` of the uncompressed contents as a `.textbundle`
     static func unpack(_ packURL: URL) throws -> URL {
-        Zip.addCustomFileExtension(Constants.pack.rawValue)
-        let zipDirectory = try Zip.quickUnzipFile(packURL)
-        let contents = try FileManager.default.contentsOfDirectory(at: zipDirectory,
+        let packFolderURL = packURL.deletingLastPathComponent()
+        try FileManager.default.unzipItem(at: packURL, to: packFolderURL)
+        let contents = try FileManager.default.contentsOfDirectory(at: packFolderURL,
                                                                includingPropertiesForKeys: nil,
                                                                options: .skipsPackageDescendants)
         let maybeBundleURL = contents.first { fileURL -> Bool in

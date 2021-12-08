@@ -13,7 +13,11 @@ final class TextBundleTests: XCTestCase {
             let matching = try FileManager.default
                 .contentsOfDirectory(at: caches,
                                      includingPropertiesForKeys: nil,
-                                     options: [.skipsPackageDescendants, .skipsHiddenFiles, .skipsSubdirectoryDescendants])
+                                     options: [
+                                        .skipsPackageDescendants,
+                                        .skipsHiddenFiles,
+                                        .skipsSubdirectoryDescendants
+                                     ])
             let pathsToDelete = matching.filter { url in
                 return (url.pathExtension == "textbundle")
                     || (url.pathExtension == "textpack")
@@ -38,18 +42,26 @@ final class TextBundleTests: XCTestCase {
     }
     
     func testBundle() throws {
-        let badURLBundle = TextBundle(name: "Fail", contents: "# Hola, Mundo!", assetURLs: nil)
+        let badURLBundle = TextBundle(name: "Fail",
+                                      contents: "# Hola, Mundo!",
+                                      assetURLs: nil)
         let invalidURL = URL(string: "~/invalid/url/path")!
         XCTAssertThrowsError(try badURLBundle.bundle(destinationURL: invalidURL) { _ in })
         
-        let cacheURL = try FileManager.default.url(for: .cachesDirectory, in: .userDomainMask, appropriateFor: nil, create: false)
+        let cacheURL = try FileManager.default.url(for: .cachesDirectory,
+                                                      in: .userDomainMask,
+                                                      appropriateFor: nil,
+                                                      create: false)
         let almostUnique = UUID().uuidString
-        guard let assetURL = Bundle.module.url(forResource: "white_rabbit", withExtension: "jpg") else {
+        guard let assetURL = Bundle.module.url(forResource: "white_rabbit",
+                                               withExtension: "jpg") else {
             XCTFail("couldn’t load resource")
             return
         }
         let textBundleName = "TestPack-\(almostUnique)"
-        let bundle = TextBundle(name: textBundleName, contents: markdownString, assetURLs: [assetURL])
+        let bundle = TextBundle(name: textBundleName,
+                                contents: markdownString,
+                                assetURLs: [assetURL])
         XCTAssertNoThrow(try bundle.bundle(destinationURL: cacheURL) { bundleURL in
             XCTAssertNotNil(bundleURL)
             do {
@@ -84,15 +96,23 @@ final class TextBundleTests: XCTestCase {
     
     func testPack() throws {
         
-        guard let rabbitImageURL: URL = Bundle.module.url(forResource: "white_rabbit", withExtension: "jpg") else {
+        guard let rabbitImageURL: URL = Bundle.module.url(forResource: "white_rabbit",
+                                                          withExtension: "jpg") else {
             XCTFail("coultn’t load image")
             return
         }
 
         let testBundleName = "TestBundle-\(UUID().uuidString)"
-        let bundle = TextBundle(name: testBundleName, contents: markdownString, assetURLs: [rabbitImageURL])
-        let destinationURL = try FileManager.default.url(for: .cachesDirectory, in: .userDomainMask, appropriateFor: nil, create: true)
-        try bundle.bundle(destinationURL: destinationURL, compressed: true, progress: { someDouble in
+        let bundle = TextBundle(name: testBundleName,
+                                contents: markdownString,
+                                assetURLs: [rabbitImageURL])
+        let destinationURL = try FileManager.default.url(for: .cachesDirectory,
+                                                            in: .userDomainMask,
+                                                            appropriateFor: nil,
+                                                            create: true)
+        try bundle.bundle(destinationURL: destinationURL,
+                          compressed: true,
+                          progress: { someDouble in
             print(someDouble)
         }) { bundleURL in
             XCTAssertNotNil(bundleURL)
@@ -127,7 +147,15 @@ final class TextBundleTests: XCTestCase {
             var meta: TextBundle.Metadata
         }
         
-        let dingus = Dingus(name: "dingus", textContents: "# Dingus", assetURLS: nil, meta: TextBundle.Metadata(1, type: "dingus", transient: true, creatorURL: nil, creatorIdentifier: nil, sourceURL: nil))
+        let dingus = Dingus(name: "dingus",
+                            textContents: "# Dingus",
+                            assetURLS: nil,
+                            meta: TextBundle.Metadata(1,
+                                                      type: "dingus",
+                                                      transient: true,
+                                                      creatorURL: nil,
+                                                      creatorIdentifier: nil,
+                                                      sourceURL: nil))
         XCTAssertNotNil(dingus)
     }
     

@@ -15,23 +15,20 @@ let package = Package(
             targets: ["TextBundle"]),
     ],
     dependencies: [
-        .package(url: "https://github.com/marmelroy/Zip.git", .upToNextMajor(from: "2.1.1")),
+        .package(url: "https://github.com/weichsel/ZIPFoundation", .upToNextMajor(from: "0.9.0")),
     ],
     targets: [
         .target(
             name: "TextBundle",
             dependencies: [
-                .product(name: "Zip", package: "Zip"),
-            ],
-            resources: [
-                .process("Resources/white_rabbit.jpg")
+                "ZIPFoundation"
             ]
         ),
         .testTarget(
             name: "TextBundleTests",
             dependencies: ["TextBundle"],
             resources: [
-                .process("Resrouces/white_rabbit.jpg")
+                .process("Resources/white_rabbit.jpg")
             ]
         ),
     ]
